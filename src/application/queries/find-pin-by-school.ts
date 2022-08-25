@@ -1,5 +1,10 @@
-import { Inject, InternalServerErrorException } from '@nestjs/common';
+import {
+  Inject,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { IQuery, IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { ErrorMessage } from 'src/domain/error';
 import { PinQueriesRepository } from 'src/domain/repositories';
 import {
   CourseEntity,
@@ -13,7 +18,9 @@ import {
 } from 'src/interfaces/v1/dto/find-pines';
 import { ItemInPines } from './pin';
 
-export class FindPinesQuery implements IQuery {}
+export class FindPinesBySchoolQuery implements IQuery {
+  constructor(readonly idSchool: string) {}
+}
 export class ItemInFindPinesResult {
   readonly idPin: string;
   readonly code: string;
@@ -26,22 +33,26 @@ export class ItemInFindPinesResult {
   readonly updatedAt: Date;
 }
 
-@QueryHandler(FindPinesQuery)
-export class FindPinesQueryHandler
-  implements IQueryHandler<FindPinesQuery, FindPinesResponseDTO>
+@QueryHandler(FindPinesBySchoolQuery)
+export class FindPinesBySchoolQueryHandler
+  implements IQueryHandler<FindPinesBySchoolQuery, FindPinesResponseDTO>
 {
   constructor(
     @Inject(PinQueriesImplements)
     readonly pinQuery: PinQueriesRepository,
   ) {}
-  async execute(): Promise<FindPinesResponseDTO> {
-    const pinQuery = await this.pinQuery.get();
+  async execute({
+    idSchool,
+  }: FindPinesBySchoolQuery): Promise<FindPinesResponseDTO> {
+    const pinQuery = await this.pinQuery.getBySchool(idSchool);
     if (pinQuery.isErr()) {
       throw new InternalServerErrorException(
         pinQuery.error.message,
         pinQuery.error.code,
       );
     }
+    if (pinQuery.value.length === 0)
+      throw new NotFoundException(ErrorMessage.PIN_NOT_FOUND);
     return new FindPinesResponseDTO(
       pinQuery.value.map(this.filterResultProperties),
     );

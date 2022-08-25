@@ -23,3 +23,13 @@ export class UpdatePinStatusDatabaseException extends InfrastructureException {
     this.code = InfrastructureExceptionCode.UpdatePinStatusDatabaseException;
   }
 }
+export class FindPinByIDatabaseException extends InfrastructureException {
+  constructor(
+    message = 'There was an error in the database finding pin by id',
+  ) {
+    super(message);
+    Object.setPrototypeOf(this, FindPinByIDatabaseException.prototype);
+
+    this.code = InfrastructureExceptionCode.FindPinByIDatabaseException;
+  }
+}

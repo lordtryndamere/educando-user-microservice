@@ -42,7 +42,7 @@ export class PinQueriesImplements implements PinQueriesRepository {
 
       if (!pin || pin.length === 0) return err(new FindPinDatabaseException());
 
-      return ok(this.convertPinFromEntity(pin));
+      return ok(this.convertPinsFromEntities(pin));
     } catch (error) {
       this.logger.error(error, null, 'PinQueriesImplements.get');
       return err(new FindPinByCodeDatabaseException());

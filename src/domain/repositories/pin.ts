@@ -12,10 +12,12 @@ export type GetPinByCodeResult = Result<QueryPin, InfrastructureException>;
 
 export type GetPinesBySchoolResult = Result<Pines, InfrastructureException>;
 
+export type findByIdResult = Result<Pin | null, InfrastructureException>;
 export interface PinCommandsRepository {
   save(pin: Pin | Pin[]): Promise<SavePinResult>;
   update(idPin: string, idCourse: string, idGrade: string): Promise<void>;
   updateStatus(idPin: string, status: number): Promise<void>;
+  findById(idPin: string): Promise<findByIdResult>;
 }
 
 export interface PinQueriesRepository {

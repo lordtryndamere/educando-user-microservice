@@ -5,12 +5,33 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TerminusModule } from '@nestjs/terminus';
 import { WinstonModule } from 'nest-winston';
 import { AppService } from './app.service';
+import {
+  CreatePinCommmandHandler,
+  UpdatePinHandler,
+} from './application/commands';
+import { UpdatePinStatusHandler } from './application/commands/update-pin-status-command';
+import {
+  FindPinesByCodeQueryHandler,
+  FindPinesQueryHandler,
+} from './application/queries';
+import { FindPinesBySchoolQueryHandler } from './application/queries/find-pin-by-school';
+import { PinFactory } from './domain/aggregates';
+import { PinCommandsImplement } from './infrastructure/repositories/pin-commands';
+import { PinQueriesImplements } from './infrastructure/repositories/pin-queries';
 import { HealthController } from './interfaces/v1/healthcheck.controller';
 import { PinController } from './interfaces/v1/pin.controller';
 
-const infrastructure = [];
-const application = [];
-const domain = [];
+const infrastructure = [PinCommandsImplement, PinQueriesImplements]; // import only the implements
+const application = [
+  // import only the handlers
+  CreatePinCommmandHandler,
+  UpdatePinHandler,
+  UpdatePinStatusHandler,
+  FindPinesQueryHandler,
+  FindPinesBySchoolQueryHandler,
+  FindPinesByCodeQueryHandler,
+];
+const domain = [PinFactory]; // importo only the factory
 
 @Module({
   imports: [

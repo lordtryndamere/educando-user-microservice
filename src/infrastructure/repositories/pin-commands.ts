@@ -2,11 +2,16 @@ import { Inject, Logger } from '@nestjs/common';
 import { err, ok } from 'neverthrow';
 
 import { Pin, PinFactory } from 'src/domain/aggregates';
-import { PinCommandsRepository, SavePinResult } from 'src/domain/repositories';
+import {
+  findByIdResult,
+  PinCommandsRepository,
+  SavePinResult,
+} from 'src/domain/repositories';
 
 import { getConnection, getRepository } from 'typeorm';
 import { PinEntity } from '../database/entities';
 import {
+  FindPinByIDatabaseException,
   FindPinDatabaseException,
   SavePinDatabaseException,
   UpdatePinStatusDatabaseException,
@@ -30,6 +35,7 @@ export class PinCommandsImplement implements PinCommandsRepository {
           .into(PinEntity)
           .values(entities)
           .execute();
+        return ok(data);
       }
       await getRepository(PinEntity).save(entities);
       return ok(data);
@@ -75,6 +81,25 @@ export class PinCommandsImplement implements PinCommandsRepository {
     }
   }
 
+  async findById(idPin: string): Promise<findByIdResult> {
+    this.logger.log(`Getting pin by id ${idPin}`);
+    try {
+      const pin = await getRepository(PinEntity).findOne({
+        where: { idPin },
+      });
+
+      if (!pin) return err(new FindPinByIDatabaseException());
+
+      return ok(this.entityToModel(pin));
+    } catch (error) {
+      this.logger.error(
+        error,
+        null,
+        'PintCommandsRepositoryImplement.findById',
+      );
+      return err(new FindPinByIDatabaseException());
+    }
+  }
   private modelToEntity(model: Pin) {
     const properties = model.properties();
     return {

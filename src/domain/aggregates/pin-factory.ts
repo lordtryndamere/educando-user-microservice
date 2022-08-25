@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 import { Result, err, ok } from 'neverthrow';
+import { Status } from '../constants/constants';
 import { PinCreatedEvent } from '../events/pin-created';
 import { DomainException } from '../exceptions/domain';
 import { PinExpirationDateShouldBeGreaterThanNowException } from '../exceptions/pin';
@@ -33,7 +34,7 @@ export class PinFactory {
       idSchool,
       code,
       expirationDate,
-      status: 1,
+      status: Status.INACTIVE,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

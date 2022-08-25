@@ -6,7 +6,7 @@ import {
   SchoolEntity,
 } from 'src/infrastructure/database/entities';
 
-export class FindPinesItem {
+export class FindPinItem {
   @ApiProperty()
   @IsString()
   readonly idPin: string;
@@ -58,11 +58,11 @@ export class FindPinesItem {
   }
 }
 
-export class FindPinesResponseDTO {
-  @ApiProperty({ type: [FindPinesItem] })
-  readonly pines: Array<FindPinesItem>;
+export class FindPinResponseDTO {
+  @ApiProperty({ type: FindPinItem })
+  readonly pin: FindPinItem;
 
-  constructor(pines: Array<FindPinesItem>) {
-    this.pines = pines;
+  constructor(pin: FindPinItem) {
+    this.pin = pin;
   }
 }
