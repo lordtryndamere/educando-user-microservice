@@ -6,6 +6,7 @@ import { PinCreatedEvent } from 'src/domain/events';
 import { SQSEventPublisherImplement } from 'src/infrastructure/message/sqs-event-publisher';
 import { IntegrationEventPublisher } from 'src/infrastructure/message/integration-event-publisher';
 import { SNSEventPublisherImplement } from 'src/infrastructure/message/sns-event-publisher';
+import { AMQEventPublisherImplement } from 'src/infrastructure/message/amq-event-publisher';
 
 @EventsHandler(PinCreatedEvent)
 export class PinCreatedHandler implements IEventHandler<PinCreatedEvent> {
@@ -16,6 +17,9 @@ export class PinCreatedHandler implements IEventHandler<PinCreatedEvent> {
 
     @Inject(SNSEventPublisherImplement)
     private readonly publishersns: IntegrationEventPublisher,
+
+    @Inject(AMQEventPublisherImplement)
+    private readonly publisheramq: IntegrationEventPublisher,
   ) {}
 
   async handle(event: PinCreatedEvent): Promise<void> {
@@ -23,24 +27,38 @@ export class PinCreatedHandler implements IEventHandler<PinCreatedEvent> {
       `${IntegrationEventSubject.PIN_CREATED}: ${JSON.stringify(event)}`,
       'PinCreatedHandler.handle',
     );
-    await this.publishersqs.publish({
-      subject: IntegrationEventSubject.PIN_CREATED,
-      data: {
-        idSchool: event.idSchool,
-        idGrade: event.idGrade,
-        idCourse: event.idCourse,
-        event: IntegrationEventSubject.PIN_CREATED,
-      },
-    });
 
-    await this.publishersns.publish({
-      subject: IntegrationEventSubject.PIN_CREATED,
-      data: {
-        idSchool: event.idSchool,
-        idGrade: event.idGrade,
-        idCourse: event.idCourse,
-        event: IntegrationEventSubject.PIN_CREATED,
-      },
-    });
+    try {
+      await this.publisheramq.publish({
+        subject: IntegrationEventSubject.PIN_CREATED,
+        data: {
+          idSchool: event.idSchool,
+          idGrade: event.idGrade,
+          idCourse: event.idCourse,
+          event: IntegrationEventSubject.PIN_CREATED,
+        },
+      });
+      await this.publishersqs.publish({
+        subject: IntegrationEventSubject.PIN_CREATED,
+        data: {
+          idSchool: event.idSchool,
+          idGrade: event.idGrade,
+          idCourse: event.idCourse,
+          event: IntegrationEventSubject.PIN_CREATED,
+        },
+      });
+
+      await this.publishersns.publish({
+        subject: IntegrationEventSubject.PIN_CREATED,
+        data: {
+          idSchool: event.idSchool,
+          idGrade: event.idGrade,
+          idCourse: event.idCourse,
+          event: IntegrationEventSubject.PIN_CREATED,
+        },
+      });
+    } catch (error) {
+      this.logger.log(error);
+    }
   }
 }

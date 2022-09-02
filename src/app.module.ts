@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TerminusModule } from '@nestjs/terminus';
 import { WinstonModule } from 'nest-winston';
 import { AppService } from './app.service';
@@ -18,6 +19,7 @@ import {
 } from './application/queries';
 import { FindPinesBySchoolQueryHandler } from './application/queries/find-pin-by-school';
 import { PinFactory } from './domain/aggregates';
+import { AMQEventPublisherImplement } from './infrastructure/message/amq-event-publisher';
 import { SNSEventPublisherImplement } from './infrastructure/message/sns-event-publisher';
 import { SQSEventPublisherImplement } from './infrastructure/message/sqs-event-publisher';
 import { PinCommandsImplement } from './infrastructure/repositories/pin-commands';
@@ -30,6 +32,7 @@ const infrastructure = [
   PinQueriesImplements,
   SQSEventPublisherImplement,
   SNSEventPublisherImplement,
+  AMQEventPublisherImplement
 ]; // import only the implements
 const application = [
   // import only the handlers
@@ -46,6 +49,19 @@ const domain = [PinFactory]; // importo only the factory
 
 @Module({
   imports: [
+    ClientsModule.register([
+      {
+        name: 'PIN_SERVICE', transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://guest:guest@localhost:5672/'],
+          queue: 'pin-messages',
+          noAck: false,
+          queueOptions: {
+            durable: false
+          },
+        },
+      },
+    ]),
     ConfigModule.forRoot(),
     WinstonModule.forRoot(AppService.loggerConfig()),
     CqrsModule,
