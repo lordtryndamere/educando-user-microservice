@@ -31,6 +31,7 @@ export class CreatePinCommmandHandler
   ) {}
   async execute(command: CreatePinCommmand): Promise<any> {
     const createdPines = [];
+    //TODO: remake factory to receive array of pines and send event
     for (let index = 1; index <= command.quantity; index++) {
       const code = `${command.idGrade}${new Date().getTime().toFixed(4)}`;
 
