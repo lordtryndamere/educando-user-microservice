@@ -11,6 +11,7 @@ import {
 } from './application/commands';
 import { UpdatePinStatusHandler } from './application/commands/update-pin-status-command';
 import { PinCreatedHandler } from './application/events/pin-created';
+import { PinUpdateHandler } from './application/events/pin-updated';
 import {
   FindPinesByCodeQueryHandler,
   FindPinesQueryHandler,
@@ -35,6 +36,7 @@ const application = [
   CreatePinCommmandHandler,
   UpdatePinHandler,
   PinCreatedHandler,
+  PinUpdateHandler,
   UpdatePinStatusHandler,
   FindPinesQueryHandler,
   FindPinesBySchoolQueryHandler,

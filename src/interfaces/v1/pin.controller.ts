@@ -34,7 +34,7 @@ export class PinController {
       body.idSchool,
       body.expirationDate,
     );
-    await this.commandBus.execute(command);
+    return await this.commandBus.execute(command);
   }
 
   @Patch('update/:idPin')
@@ -45,7 +45,7 @@ export class PinController {
   })
   async update(@Param('idPin') idPin: string, @Body() dto: UpdatePinBodyDTO) {
     const command = new UpdatePinCommand(idPin, dto.idGrade, dto.idCourse);
-    await this.commandBus.execute(command);
+    return await this.commandBus.execute(command);
   }
   @Patch('update-status/:idPin')
   @ApiResponse({ status: 200, description: ResponseDescription.OK })
@@ -58,7 +58,7 @@ export class PinController {
     @Body() dto: UpdateStatusBodyDTO,
   ) {
     const command = new UpdatePinStatusCommand(idPin, dto.status);
-    await this.commandBus.execute(command);
+    return await this.commandBus.execute(command);
   }
   @Get('find-all')
   @ApiResponse({ status: 200, description: ResponseDescription.OK })
@@ -68,7 +68,7 @@ export class PinController {
   })
   async findAll() {
     const query = new FindPinesQuery();
-    await this.queryBus.execute(query);
+    return await this.queryBus.execute(query);
   }
   @Get('find-by-code/:code')
   @ApiResponse({ status: 200, description: ResponseDescription.OK })
@@ -78,7 +78,7 @@ export class PinController {
   })
   async findOneByCode(@Param('code') code: string) {
     const query = new FindPinByCodeQuery(code);
-    await this.queryBus.execute(query);
+    return await this.queryBus.execute(query);
   }
   @Get('find-by-code/:idSchool')
   @ApiResponse({ status: 200, description: ResponseDescription.OK })
@@ -88,6 +88,6 @@ export class PinController {
   })
   async findBySchool(@Param('idSchool') idSchool: string) {
     const query = new FindPinesBySchoolQuery(idSchool);
-    await this.queryBus.execute(query);
+    return await this.queryBus.execute(query);
   }
 }
