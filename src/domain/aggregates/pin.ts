@@ -1,5 +1,5 @@
 import { AggregateRoot } from '@nestjs/cqrs';
-import { Result, err, ok } from 'neverthrow';
+import { Result, err } from 'neverthrow';
 import { Status } from '../constants/constants';
 import { PinUpdatedEvent } from '../events/pin-updated';
 import { DomainException } from '../exceptions/domain';
@@ -36,59 +36,44 @@ type updatePinStatus = Result<
 >;
 
 export class PinImplement extends AggregateRoot implements Pin {
-  private _properties: PinProperties;
-  private _status: number;
-  private readonly _expirationDate: Date;
-  private _createdAt: Date;
-  private _updatedAt: Date;
-  private _idCourse: string;
-  private _idGrade: string;
-  private _idSchool: string;
-  private readonly _idPin: string;
-  private readonly _code: string;
-  constructor(properties: PinProperties) {
+  private status: number;
+  private readonly expirationDate: Date;
+  private createdAt: Date;
+  private updatedAt: Date;
+  private idCourse: string;
+  private idGrade: string;
+  private idSchool: string;
+  private readonly idPin: string;
+  private readonly code: string;
+  constructor(properties: PinEssentialProperties & PinOptionalProperties) {
     super();
-    this._properties = properties;
-    this._status = properties.status;
-    this._expirationDate = properties.expirationDate;
-    this._createdAt = properties.createdAt;
-    this._updatedAt = properties.updatedAt;
-    this._idCourse = properties.idCourse;
-    this._idGrade = properties.idGrade;
-    this._idSchool = properties.idSchool;
-    this._idPin = properties.idPin;
-    this._code = properties.code;
+    Object.assign(this, properties);
   }
-  public properties = () => this._properties;
-  public commit = () => {
-    this._properties = {
-      ...this._properties,
-      status: this._status,
-      expirationDate: this._expirationDate,
-      createdAt: this._createdAt,
-      updatedAt: this._updatedAt,
-      idCourse: this._idCourse,
-      idGrade: this._idGrade,
-      idSchool: this._idSchool,
-      idPin: this._idPin,
-      code: this._code,
+  public properties = (): PinProperties => {
+    return {
+      idPin: this.idPin,
+      code: this.code,
+      status: this.status,
+      idSchool: this.idSchool,
+      idCourse: this.idCourse,
+      idGrade: this.idGrade,
+      expirationDate: this.expirationDate,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     };
   };
+
   public update = (idPin: string, idCourse: string, idGrade: string) => {
-    this._idCourse = idCourse;
-    this._idGrade = idGrade;
-    this._updatedAt = new Date();
+    this.idCourse = idCourse;
+    this.idGrade = idGrade;
+    this.updatedAt = new Date();
     this.apply(Object.assign(new PinUpdatedEvent(), this));
-    this.commit();
-    return ok(this);
   };
   public updateStatus = (idPin: string, status: number): updatePinStatus => {
-    if (this._status === Status.DESACTIVATED)
-      return err(new PinIsAlreadyDesactivatedException(this._idPin));
-    this._status = status;
-    this._updatedAt = new Date();
+    if (this.status === Status.DESACTIVATED)
+      return err(new PinIsAlreadyDesactivatedException(this.idPin));
+    this.status = status;
+    this.updatedAt = new Date();
     this.apply(Object.assign(new PinUpdatedEvent(), this));
-    this.commit();
-    return ok(this);
   };
 }

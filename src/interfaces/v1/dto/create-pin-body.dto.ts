@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class CreatePinBodyDTO {
   @IsNumber()
@@ -15,7 +15,7 @@ export class CreatePinBodyDTO {
   @IsString()
   @ApiProperty({ example: 'uuid' })
   readonly idCourse: string;
-  @IsDate()
+  @IsDateString()
   @ApiProperty({ example: '2022-01-03' })
   readonly expirationDate: Date;
 }

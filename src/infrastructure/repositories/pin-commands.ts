@@ -27,7 +27,9 @@ export class PinCommandsImplement implements PinCommandsRepository {
     this.logger.log(`Saving pin ${data}`);
     try {
       const models = Array.isArray(data) ? data : [data];
+
       const entities: any = models.map((model) => this.modelToEntity(model));
+
       if (Array.isArray(data)) {
         await getConnection()
           .createQueryBuilder()

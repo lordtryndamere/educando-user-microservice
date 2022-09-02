@@ -1,4 +1,9 @@
-import { Inject, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { CommandHandler, ICommand, ICommandHandler } from '@nestjs/cqrs';
 import { PinFactory } from 'src/domain/aggregates';
 import { PinCommandsRepository } from 'src/domain/repositories';
@@ -26,13 +31,11 @@ export class CreatePinCommmandHandler
   ) {}
   async execute(command: CreatePinCommmand): Promise<any> {
     const createdPines = [];
-    for (let index = 0; index <= command.quantity; index++) {
-      const code = `${command.idSchool}${command.idCourse}${
-        command.idGrade
-      }${new Date().getTime().toFixed(5)}`;
+    for (let index = 1; index <= command.quantity; index++) {
+      const code = `${command.idGrade}${new Date().getTime().toFixed(4)}`;
 
       const idPin = uuidv4();
-      const createResult: any = this.pinFactory.create(
+      const createResult = this.pinFactory.create(
         idPin,
         command.idCourse,
         command.idGrade,
@@ -40,6 +43,13 @@ export class CreatePinCommmandHandler
         code,
         command.expirationDate,
       );
+      if (createResult.isErr()) {
+        this.logger.warn(createResult.error, 'CreatePinHandler.execute');
+        throw new BadRequestException(
+          createResult.error.message,
+          createResult.error.name,
+        );
+      }
       createResult.value.commit();
 
       createdPines.push(createResult.value);

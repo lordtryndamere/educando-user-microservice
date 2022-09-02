@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CourseEntity } from './course';
-import { PinEntity } from './pin';
+import { CourseEntity } from './course.entity';
+import { PinEntity } from './pin.entity';
 
 @Entity('grade')
 export class GradeEntity {
@@ -23,9 +23,9 @@ export class GradeEntity {
 
   @Column({ type: 'varchar' })
   type = '';
-  @CreateDateColumn({ type: 'timestamp with local time zone' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp with local time zone' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
   @ManyToOne(() => CourseEntity, (course) => course.grades)
   idCourse: CourseEntity;

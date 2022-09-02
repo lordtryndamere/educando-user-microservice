@@ -1,6 +1,12 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Connection, createConnection } from 'typeorm';
 import * as winston from 'winston';
+import {
+  CourseEntity,
+  GradeEntity,
+  PinEntity,
+  SchoolEntity,
+} from './infrastructure/database/entities';
 
 class DBConfig {
   readonly host: string;
@@ -10,6 +16,16 @@ class DBConfig {
   readonly password: string;
   readonly synchronize: boolean;
   readonly logging: boolean;
+}
+export class SNSConfig {
+  readonly topic: string;
+  readonly region: string;
+}
+
+export class SQSConfig {
+  readonly delay: string;
+  readonly url: string;
+  readonly region: string;
 }
 
 @Injectable()
@@ -39,6 +55,24 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     const { APP_TITLE } = process.env;
     return APP_TITLE ? APP_TITLE : 'PIN MS';
   }
+  static sqsEventsConfig(): SQSConfig {
+    return {
+      delay: process.env.SQS_DELAY || '10',
+      url:
+        process.env.SQS_URL ||
+        'https://sqs.us-east-1.amazonaws.com/525443015883/educando-ms-queue',
+      region: process.env.AWS_REGION || 'us-east-1',
+    };
+  }
+  static snsEventsConfig(): SNSConfig {
+    return {
+      topic:
+        process.env.SNS_TOPIC ||
+        'arn:aws:sns:us-east-1:525443015883:pin-handler',
+      region: process.env.AWS_REGION || 'us-east-1',
+    };
+  }
+
   static loggerConfig(): winston.LoggerOptions {
     const format =
       AppService.environment() !== 'LOCAL'
@@ -64,11 +98,14 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     };
   }
   async onModuleInit(): Promise<void> {
-    const entities = [__dirname + '/../**/*.entity{.ts,.js}'];
+    // const entities = [__dirname + '/../**/*.entity{.ts,.js}'];
 
+    const entities = [CourseEntity, GradeEntity, SchoolEntity, PinEntity];
     if (AppService.node_environment().toUpperCase() !== 'TEST')
       this.databaseConnection = await createConnection({
         ...this.loadDBConfig(),
+        synchronize: 'true' === process.env.DATABASE_SYNC,
+        logging: 'true' === process.env.DATABASE_LOGGING,
         type: 'mysql',
         entities,
       }).catch((error: Error) => this.failToConnectDatabase(error));
@@ -77,9 +114,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     return {
       host: process.env.DATABASE_HOST || 'localhost',
       port: parseInt(process.env.DATABASE_PORT, 10) || 3306,
-      database: process.env.DATABASE_NAME || 'pin-db',
-      username: process.env.DATABASE_USER || 'root',
-      password: process.env.DATABASE_PASSWORD || 'my-secret-pw',
+      database: process.env.DATABASE_NAME || 'pinms',
+      username: process.env.DATABASE_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || '123',
       synchronize: 'true' === process.env.DATABASE_SYNC,
       logging: 'true' === process.env.DATABASE_LOGGING,
     };

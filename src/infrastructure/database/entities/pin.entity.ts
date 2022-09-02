@@ -6,9 +6,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CourseEntity } from './course';
-import { GradeEntity } from './grade';
-import { SchoolEntity } from './school';
+import { CourseEntity } from './course.entity';
+import { GradeEntity } from './grade.entity';
+import { SchoolEntity } from './school.entity';
 
 @Entity('pin')
 export class PinEntity {
@@ -21,12 +21,12 @@ export class PinEntity {
   @Column({ type: 'int' })
   status: number;
 
-  @Column({ type: 'timestamp with local time zone' })
+  @Column({ type: 'timestamp' })
   expirationDate: Date;
 
-  @CreateDateColumn({ type: 'timestamp with local time zone' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp with local time zone' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   @ManyToOne(() => SchoolEntity, (school) => school.pines)

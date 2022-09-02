@@ -7,23 +7,20 @@ import { DomainException } from '../exceptions/domain';
 import { PinExpirationDateShouldBeGreaterThanNowException } from '../exceptions/pin';
 import { Pin, PinImplement, PinProperties } from './pin';
 
-type createPinDomainResult = Result<
-  Pin,
-  PinExpirationDateShouldBeGreaterThanNowException | DomainException
->;
+type createPinDomainResult = Result<Pin, DomainException>;
 
 export class PinFactory {
   constructor(
-    @Inject(EventPublisher) private readonly _eventPublisher: EventPublisher,
+    @Inject(EventPublisher) private readonly eventPublisher: EventPublisher,
   ) {}
-  async create(
+  create(
     idPin: string,
     idCourse: string,
     idGrade: string,
     idSchool: string,
     code: string,
     expirationDate: Date,
-  ): Promise<createPinDomainResult> {
+  ): createPinDomainResult {
     if (expirationDate < new Date())
       return err(new PinExpirationDateShouldBeGreaterThanNowException());
 
@@ -38,13 +35,11 @@ export class PinFactory {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    const context = this._eventPublisher.mergeObjectContext(pin);
+    const context = this.eventPublisher.mergeObjectContext(pin);
     pin.apply(Object.assign(new PinCreatedEvent(), pin));
     return ok(context);
   }
   reconstitute(properties: PinProperties): Pin {
-    return this._eventPublisher.mergeObjectContext(
-      new PinImplement(properties),
-    );
+    return this.eventPublisher.mergeObjectContext(new PinImplement(properties));
   }
 }

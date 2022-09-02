@@ -6,13 +6,14 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CourseEntity } from './course';
-import { PinEntity } from './pin';
+import { v4 as uuidv4 } from 'uuid';
+import { CourseEntity } from './course.entity';
+import { PinEntity } from './pin.entity';
 
 @Entity('school')
 export class SchoolEntity {
   @PrimaryGeneratedColumn('uuid')
-  idSchool!: string;
+  idSchool = uuidv4();
 
   @Column({ type: 'varchar' })
   name = '';
@@ -46,9 +47,9 @@ export class SchoolEntity {
 
   @Column({ type: 'varchar' })
   logoUrl = '';
-  @CreateDateColumn({ type: 'timestamp with local time zone' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp with local time zone' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
   @OneToMany(() => PinEntity, (pin) => pin.idSchool, {
     cascade: true,
